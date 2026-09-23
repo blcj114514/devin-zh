@@ -1,0 +1,11 @@
+# local artifacts
+*.bak-*
+*.bak
+*.log
+_backup/
+_tmp/
+node_modules/
+
+# windows
+Thumbs.db
+desktop.ini
