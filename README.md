@@ -115,15 +115,15 @@ devin-zh/
 - **会话内容不翻译**：对话正文由模型生成，属数据而非界面；注入器按容器排除会话正文（`[data-transcript-row-key]`、`[class*="prose"]`）与列表行（`.monaco-list-row`）
 - **第三方扩展元数据不翻译**：扩展名、作者描述、发布者名（远程数据）
 - **产品/模型名保留英文**：SWE-2、Claude Fable 5.1、Devin Local、Pro、Wiki 等
-- **被 React 拆分成多个文本节点的动态文案**（如 `Using Open VSX mirror (change here)`）暂无法匹配，需要后续合并相邻节点才能处理
-- 仅测试于 Devin Desktop **1.126.0**（Windows）；其他版本可能需要调整词库或选择器
+- ~~被 React 拆分成多个文本节点的动态文案~~ 已支持：注入脚本内置相邻文本节点合并匹配（`mergeMatch`），`{count} MCP servers` 这类拆分文案可正常命中
+- 已测试于 Devin Desktop **v3.9.19 / v3.10.48**（Windows，内部 VS Code 基线均为 1.126.0）；其他版本可能需要调整词库或选择器
 
 ## 补翻译 / 维护
 
 - **发现漏翻**：把英文原文加进 `dict/zh-dict.json`（格式 `"English": "中文"`），重启注入器即生效
-- **词库热更新**（不重启）：在 Devin 的调试控制台执行
+- **词库热更新**（不重启）：在 Devin 的调试控制台执行（**合并式增量**，勿整体替换，否则会丢掉已有条目）
   ```js
-  window.__DEVIN_ZH_DICT__ = { ...新词库 };
+  Object.assign(window.__DEVIN_ZH_DICT__, { 'New text': '新文案' });
   window.__devinZhRun();
   ```
 - **Devin 升级后**：语言包不受影响；新增文案按上面方式补词库即可
