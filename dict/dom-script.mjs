@@ -19,6 +19,13 @@ export function buildScript(dict) {
     [/^(\\d+)\\s*d\\s+ago$/, '$1 天前'],
     [/^(\\d+)\\s*h\\s+ago$/, '$1 小时前'],
     [/^(\\d+)\\s*m\\s+ago$/, '$1 分钟前'],
+    [/^(\\d+)\\s*seconds?\\s+ago$/, '$1 秒前'],
+    [/^(\\d+)\\s*minutes?\\s+ago$/, '$1 分钟前'],
+    [/^(\\d+)\\s*hours?\\s+ago$/, '$1 小时前'],
+    [/^(\\d+)\\s*days?\\s+ago$/, '$1 天前'],
+    [/^(\\d+)\\s*weeks?\\s+ago$/, '$1 周前'],
+    [/^(\\d+)\\s*months?\\s+ago$/, '$1 个月前'],
+    [/^(\\d+)\\s*years?\\s+ago$/, '$1 年前'],
     [/^(\\d+)\\s*days?$/, '$1 天'],
     [/^(\\d+)\\s*weeks?$/, '$1 周'],
     [/^(\\d+)\\s*hours?$/, '$1 小时'],
@@ -96,7 +103,17 @@ export function buildScript(dict) {
   }
   function trAttrs(root) {
     if (!root || !root.querySelectorAll) return;
-    var els = root.querySelectorAll('[title],[aria-label],[placeholder],[data-tooltip-content]');
+    // 根元素自身若带目标属性也要处理（querySelectorAll 只选后代；observer 入队的
+    // attributes 变更 target 恰是元素自身，不补这里就永远只能靠 9s 全量兜底）
+    var ATTR_SEL = '[title],[aria-label],[placeholder],[data-tooltip-content]';
+    var els;
+    if (root.matches && root.matches(ATTR_SEL)) {
+      els = [root];
+      var desc = root.querySelectorAll(ATTR_SEL);
+      for (var d = 0; d < desc.length; d++) els.push(desc[d]);
+    } else {
+      els = root.querySelectorAll(ATTR_SEL);
+    }
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
       // 与文本节点保持对称：skip zone 内的属性同样不翻
@@ -159,8 +176,9 @@ export function buildScript(dict) {
       if (window.__DEVIN_ZH_PENDING__) return;
       window.__DEVIN_ZH_PENDING__ = setTimeout(__flush, 250);
     });
-    // document-start 时 body 可能还不存在 → 用 documentElement 兜底，避免整脚本抛错
-    var __root = document.body || document.documentElement;
+    // document-start 早期 body 与 documentElement 可能都还不存在 → document 恒为 Node，
+    // observe(document) 合法，避免极早期 frame 整脚本中止（观察不到 body 也由 9s 兜底覆盖）
+    var __root = document.body || document.documentElement || document;
     window.__DEVIN_ZH_OBS__.observe(__root, {
       childList: true, subtree: true, characterData: true,
       attributes: true, attributeFilter: ['title', 'aria-label', 'placeholder', 'data-tooltip-content']

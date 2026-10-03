@@ -1637,5 +1637,9 @@
  "Empty editor group actions": "空编辑器组操作",
  "Title activity actions": "标题栏活动操作",
  "Open Marketplace": "打开市场",
- "Prompt": "提示词"
+ "Prompt": "提示词",
+ "Tip: New session (Ctrl+T)": "提示：新会话 (Ctrl+T)",
+ "Send all to agent": "全部发送给智能体",
+ "Thoughts": "思考",
+ "Command": "命令"
 }
